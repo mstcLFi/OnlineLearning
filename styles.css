@@ -98,7 +98,7 @@ body {
 .sway-container {
   position: relative;
   width: 100vw;       /* full viewport width */
-  height: 70vh;       /* adjust as needed */
+  height: 80vh;       /* adjust as needed */
   overflow: hidden;
   margin-left: calc(-50vw + 50%); /* remove side white space */
   z-index: 0;         /* below navbar */
@@ -113,4 +113,17 @@ body {
   height: 100%;
   border: 0;
 }
+
+/* Transparent overlay on top of iframe when menu is open */
+.iframe-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 900;          /* above iframe but below navbar/menu */
+  display: none;
+  background: transparent;
+}
+
 
