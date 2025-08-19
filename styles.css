@@ -20,7 +20,8 @@ body {
   align-items: center;
   background: #0c34a3;
   color: white;
-  padding: 0.8rem 1.5rem;
+  padding: 0 1.5rem;
+  height: 60px; /* fixed navbar height */
   position: fixed;       /* fixed on top */
   top: 0;
   left: 0;
@@ -28,11 +29,32 @@ body {
   z-index: 1000;         /* above other content */
 }
 
+/* Logo */
 .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* increased space between logo and text */
 }
 
+.logo img {
+  height: 100%;    /* fill almost entire navbar height */
+  max-height: 100px; /* leave a tiny padding inside 60px navbar */
+  width: auto;    /* maintain aspect ratio */
+  vertical-align: middle;
+}
+
+.logo span {
+  font-size: 1.6rem;   /* larger text for Online Learning */
+  font-weight: bold;
+  font-style: italic;
+  color: white;
+  line-height: 1;      /* aligns nicely with logo image */
+  display: flex;
+  align-items: center; /* vertically center with logo */
+}
+
+
+/* Navigation links */
 .nav-links {
   display: flex;
   gap: 1rem;
@@ -90,20 +112,21 @@ body {
 /* Page content */
 .content {
   padding: 2rem;
-  padding-top: 0; /* remove extra space since Sway is flush with navbar */
+  padding-top: 80px; /* offset for fixed navbar height */
   text-align: center;
 }
 
 /* Sway container */
 .sway-container {
   position: relative;
-  width: 100vw;       /* full viewport width */
-  height: 80vh;       /* adjust as needed */
+  width: 100vw;
+  height: 80vh;
   overflow: hidden;
-  margin-left: calc(-50vw + 50%); /* remove side white space */
-  z-index: 0;         /* below navbar */
-  margin-top: 60px;   /* offset for fixed navbar height */
+  margin-left: calc(-50vw + 50%);
+  z-index: 0;
+  margin-top: 0px; /* offset for fixed navbar height */
 }
+
 
 .sway-container iframe {
   position: absolute;
@@ -125,5 +148,3 @@ body {
   display: none;
   background: transparent;
 }
-
-

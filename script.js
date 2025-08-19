@@ -1,4 +1,7 @@
-// Load the navbar dynamically
+const overlay = document.createElement("div");
+overlay.className = "iframe-overlay";
+document.body.appendChild(overlay);
+
 fetch("header.html")
   .then(res => res.text())
   .then(data => {
@@ -7,26 +10,25 @@ fetch("header.html")
     const hamburger = document.getElementById("hamburger");
     const navLinks = document.getElementById("nav-links");
 
-    // Toggle menu when hamburger clicked
-    hamburger.addEventListener("click", (e) => {
-      e.stopPropagation(); // prevent click from bubbling up
+    const toggleMenu = () => {
       navLinks.classList.toggle("show");
+      overlay.style.display = navLinks.classList.contains("show") ? "block" : "none";
+    };
+
+    hamburger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu();
     });
 
-    // Close menu when clicking outside of it
-    document.addEventListener("click", (e) => {
-      if (navLinks.classList.contains("show") && 
-          !navLinks.contains(e.target) && 
-          !hamburger.contains(e.target)) {
-        navLinks.classList.remove("show");
-      }
+    overlay.addEventListener("click", () => {
+      navLinks.classList.remove("show");
+      overlay.style.display = "none";
     });
 
-    // Optional: close menu when a link is clicked (mobile UX)
     navLinks.querySelectorAll("a").forEach(link => {
       link.addEventListener("click", () => {
         navLinks.classList.remove("show");
+        overlay.style.display = "none";
       });
     });
-  })
-  .catch(err => console.error("Error loading header:", err));
+  });
