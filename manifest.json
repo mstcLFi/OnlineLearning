@@ -1,7 +1,7 @@
 {
   "name": "MSTC Online Learning",
   "short_name": "MSTC",
-  "start_url": "/index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0c34a3",
   "theme_color": "#0c34a3",
