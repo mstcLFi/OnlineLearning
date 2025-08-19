@@ -98,11 +98,11 @@ body {
 .sway-container {
   position: relative;
   width: 100vw;       /* full viewport width */
-  height: 80vh;       /* adjust as needed */
+  height: 70vh;       /* adjust as needed */
   overflow: hidden;
   margin-left: calc(-50vw + 50%); /* remove side white space */
   z-index: 0;         /* below navbar */
-  top: 0;             /* flush with top */
+  margin-top: 60px;   /* offset for fixed navbar height */
 }
 
 .sway-container iframe {
@@ -113,3 +113,4 @@ body {
   height: 100%;
   border: 0;
 }
+
