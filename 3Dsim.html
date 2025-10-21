@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>VR Kamer - Loopbereik & HUD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-virtual-controls@3.1.0/dist/aframe-virtual-controls.min.js"></script>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#000; }
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 18px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">Afstand tot midden: 0.00 m</div>
+
+  <a-scene background="#222" renderer="colorManagement: true; physicallyCorrectLights: true;">
+    
+    <!-- Camera Rig -->
+    <a-entity id="cameraRig" position="0 0 0" rotation="0 180 0" loop-limiter>
+      <a-camera position="0 1.6 0" look-controls wasd-controls="acceleration:5"></a-camera>
+      <!-- Virtuele joystick voor mobiel -->
+      <a-virtual-controls touch-controls="enabled: true" joystick-controls="enabled: true; deadzone:0.1"></a-virtual-controls>
+    </a-entity>
+    
+    <!-- Licht -->
+    <a-entity light="type: ambient; intensity:0.5"></a-entity>
+    <a-entity light="type: directional; intensity:1.2" position="2 4 2"></a-entity>
+    <a-entity light="type: directional; intensity:0.8" position="-2 4 -2"></a-entity>
+    
+    <!-- Kamer model -->
+    <a-entity 
+      gltf-model="kamer.glb"
+      position="0 0 0"
+      rotation="0 180 0"
+      scale="1 1 1"
+    ></a-entity>
+
+    <!-- Component om loopbereik te limiteren en afstand te tonen -->
+    <script>
+      AFRAME.registerComponent('loop-limiter', {
+        schema: { maxDistance: { type: 'number', default: 4 } },
+        tick: function () {
+          const rig = this.el;
+          const camera = rig.querySelector('a-camera');
+          
+          // Wereldpositie van de camera
+          const pos = camera.object3D.getWorldPosition(new THREE.Vector3());
+
+          // Bereken afstand tot midden
+          let distance = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+
+          // Update HUD
+          document.getElementById('hud').innerText = `Afstand tot midden: ${distance.toFixed(2)} m`;
+
+          // Als we verder dan maxDistance zijn, corrigeer rig positie
+          if (distance > this.data.maxDistance) {
+            const over = distance - this.data.maxDistance;
+            // Richting vector vanaf midden
+            const dirX = pos.x / distance;
+            const dirZ = pos.z / distance;
+            // Verplaats rig terug over het overschot
+            rig.object3D.position.x -= dirX * over;
+            rig.object3D.position.z -= dirZ * over;
+          }
+        }
+      });
+
+    </script>
+
+  </a-scene>
+</body>
+</html>
