@@ -5,58 +5,23 @@
   <title>360 Simulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-virtual-controls@3.1.0/dist/aframe-virtual-controls.min.js"></script>
   <style>
     html, body {
       margin: 0;
       height: 100%;
       overflow: hidden;
       background: #000;
-    }
-
-    /* Up/Down buttons for mobile */
-    #heightButtons {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      z-index: 200;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    #heightButtons button {
-      padding: 10px 14px;
-      font-size: 20px;
-      border: none;
-      border-radius: 8px;
-      background: rgba(50, 50, 50, 0.6);
-      color: #fff;
-      cursor: pointer;
-    }
-
-    #heightButtons button:active {
-      background: rgba(100, 100, 100, 0.8);
+      touch-action: none; /* prevent browser scrolling during gestures */
     }
   </style>
 </head>
 <body>
-
-  <!-- Height control buttons for mobile -->
-  <div id="heightButtons">
-    <button onclick="moveHeight(1)">⬆️</button>
-    <button onclick="moveHeight(-1)">⬇️</button>
-  </div>
-
   <a-scene background="#222" renderer="colorManagement: true; physicallyCorrectLights: true;">
 
     <!-- Camera Rig -->
     <a-entity id="cameraRig" position="0 0 0" rotation="0 180 0"
-              loop-limiter height-controls>
+              loop-limiter height-controls gesture-controls motion-walk>
       <a-camera position="0 1.6 0" look-controls wasd-controls="acceleration:5"></a-camera>
-      <!-- Virtual joystick for mobile -->
-      <a-virtual-controls touch-controls="enabled: true" joystick-controls="enabled: true; deadzone:0.1"></a-virtual-controls>
     </a-entity>
 
     <!-- Lights -->
@@ -72,9 +37,10 @@
       scale="1 1 1">
     </a-entity>
 
-    <!-- Custom Components -->
     <script>
-      // Restrict walking distance from center
+      /* -------------------------------------------------
+         Restrict movement to a circular area
+      ------------------------------------------------- */
       AFRAME.registerComponent('loop-limiter', {
         schema: { maxDistance: { type: 'number', default: 4 } },
         tick: function () {
@@ -83,7 +49,6 @@
           const pos = camera.object3D.getWorldPosition(new THREE.Vector3());
           let distance = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
 
-          // Limit movement radius
           if (distance > this.data.maxDistance) {
             const over = distance - this.data.maxDistance;
             const dirX = pos.x / distance;
@@ -94,7 +59,9 @@
         }
       });
 
-      // Height control via keyboard (Q/E)
+      /* -------------------------------------------------
+         Keyboard-based height control (PC)
+      ------------------------------------------------- */
       AFRAME.registerComponent('height-controls', {
         schema: { step: {type: 'number', default: 0.1}, minY: {type: 'number', default: 0.6}, maxY: {type: 'number', default: 2.6} },
         init: function () {
@@ -107,12 +74,82 @@
         }
       });
 
-      // Touch button handler for mobile
-      function moveHeight(dir) {
-        const rig = document.querySelector('#cameraRig');
-        const pos = rig.object3D.position;
-        pos.y = THREE.MathUtils.clamp(pos.y + dir * 0.1, 0.6, 2.6);
-      }
+      /* -------------------------------------------------
+         Gesture controls for mobile
+         - Swipe up/down: move vertically
+         - Pinch zoom: move forward/backward
+      ------------------------------------------------- */
+      AFRAME.registerComponent('gesture-controls', {
+        schema: { verticalStep: {default: 0.005}, moveStep: {default: 0.01}, minY: {default: 0.6}, maxY: {default: 2.6} },
+        init: function () {
+          const rig = this.el;
+          let startDist = null;
+          let startY = null;
+          let touchStartY = null;
+
+          window.addEventListener('touchstart', e => {
+            if (e.touches.length === 2) {
+              // Pinch start
+              const dx = e.touches[0].clientX - e.touches[1].clientX;
+              const dy = e.touches[0].clientY - e.touches[1].clientY;
+              startDist = Math.sqrt(dx*dx + dy*dy);
+            } else if (e.touches.length === 1) {
+              // Single touch start for vertical movement
+              startY = rig.object3D.position.y;
+              touchStartY = e.touches[0].clientY;
+            }
+          }, {passive: false});
+
+          window.addEventListener('touchmove', e => {
+            if (e.touches.length === 2 && startDist !== null) {
+              // Pinch zoom -> move forward/back
+              const dx = e.touches[0].clientX - e.touches[1].clientX;
+              const dy = e.touches[0].clientY - e.touches[1].clientY;
+              const newDist = Math.sqrt(dx*dx + dy*dy);
+              const delta = newDist - startDist;
+              startDist = newDist;
+
+              const dir = new THREE.Vector3();
+              rig.object3D.getWorldDirection(dir);
+              rig.object3D.position.addScaledVector(dir, delta * this.data.moveStep);
+            } 
+            else if (e.touches.length === 1 && startY !== null) {
+              // Swipe up/down -> height change
+              const deltaY = e.touches[0].clientY - touchStartY;
+              const newY = THREE.MathUtils.clamp(startY - deltaY * this.data.verticalStep, this.data.minY, this.data.maxY);
+              rig.object3D.position.y = newY;
+            }
+          }, {passive: false});
+
+          window.addEventListener('touchend', e => {
+            if (e.touches.length < 2) startDist = null;
+            if (e.touches.length < 1) startY = null;
+          });
+        }
+      });
+
+      /* -------------------------------------------------
+         Motion-based walking (device motion)
+         Moves user slightly when physically moving the phone.
+         (Uses acceleration magnitude to step forward)
+      ------------------------------------------------- */
+      AFRAME.registerComponent('motion-walk', {
+        schema: { sensitivity: {default: 0.001} },
+        init: function () {
+          const rig = this.el;
+          if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', e => {
+              const acc = e.accelerationIncludingGravity;
+              const magnitude = Math.sqrt(acc.x*acc.x + acc.y*acc.y + acc.z*acc.z);
+              if (magnitude > 12) { // Only react to stronger motion
+                const dir = new THREE.Vector3();
+                rig.object3D.getWorldDirection(dir);
+                rig.object3D.position.addScaledVector(dir, this.data.sensitivity * (magnitude - 12));
+              }
+            });
+          }
+        }
+      });
     </script>
 
   </a-scene>
