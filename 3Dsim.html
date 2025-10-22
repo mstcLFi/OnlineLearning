@@ -123,7 +123,7 @@
           } else if (e.touches.length === 1 && startYTouch !== null) {
             const deltaY = e.touches[0].clientY - touchStartY;
             rig.object3D.position.y = THREE.MathUtils.clamp(
-              startYTouch - deltaY * 0.005, startY - 0.5, startY + 1.5
+              startYTouch + deltaY * 0.005, startY - 0.5, startY + 1.5
             );
           }
         }, { passive: false });
@@ -137,4 +137,5 @@
   </a-scene>
 </body>
 </html>
+
 
