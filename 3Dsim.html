@@ -119,7 +119,7 @@
             camera.object3D.getWorldDirection(dir);
             dir.y = 0;
             dir.normalize();
-            rig.object3D.position.addScaledVector(dir, delta * 0.01);
+            rig.object3D.position.addScaledVector(dir, -delta * 0.01);
           } else if (e.touches.length === 1 && startYTouch !== null) {
             const deltaY = e.touches[0].clientY - touchStartY;
             rig.object3D.position.y = THREE.MathUtils.clamp(
@@ -137,3 +137,4 @@
   </a-scene>
 </body>
 </html>
+
