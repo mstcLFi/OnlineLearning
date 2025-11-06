@@ -87,7 +87,7 @@ const startY = rig.object3D.position.y;
 
 /* Limit movement radius */
 AFRAME.registerComponent('loop-limiter', {
-  schema: { maxDistance: { type: 'number', default: 4 } },
+  schema: { maxDistance: { type: 'number', default: 4.5 } },
   tick: function () {
     const pos = camera.object3D.getWorldPosition(new THREE.Vector3());
     const distance = Math.sqrt(pos.x*pos.x + pos.z*pos.z);
