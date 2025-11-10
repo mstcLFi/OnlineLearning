@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="../images/icon-192.png">
   <link rel="icon" type="image/png" sizes="512x512" href="../images/icon-512.png">
   <link rel="apple-touch-icon" sizes="180x180" href="../images/apple-touch-icon.png">
-
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QCWB0W4ZL2"></script>
   <style>
     html, body {
       margin: 0;
@@ -87,7 +87,7 @@ const startY = rig.object3D.position.y;
 
 /* Limit movement radius */
 AFRAME.registerComponent('loop-limiter', {
-  schema: { maxDistance: { type: 'number', default: 4.5 } },
+  schema: { maxDistance: { type: 'number', default: 4 } },
   tick: function () {
     const pos = camera.object3D.getWorldPosition(new THREE.Vector3());
     const distance = Math.sqrt(pos.x*pos.x + pos.z*pos.z);
