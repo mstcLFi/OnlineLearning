@@ -87,7 +87,7 @@ const startY = rig.object3D.position.y;
 
 /* Limit movement radius */
 AFRAME.registerComponent('loop-limiter', {
-  schema: { maxDistance: { type: 'number', default: 4 } },
+  schema: { maxDistance: { type: 'number', default: 4.5 } },
   tick: function () {
     const pos = camera.object3D.getWorldPosition(new THREE.Vector3());
     const distance = Math.sqrt(pos.x*pos.x + pos.z*pos.z);
@@ -104,8 +104,8 @@ rig.setAttribute('loop-limiter','');
 if(!isMobile){
   document.addEventListener('keydown', e=>{
     const pos = rig.object3D.position;
-    const minY = startY-0.5;
-    const maxY = startY+1.5;
+    const minY = startY-1.0;
+    const maxY = startY+1.0;
     if(e.key==='q'||e.key==='Q') pos.y = Math.max(pos.y-0.1,minY);
     if(e.key==='e'||e.key==='E') pos.y = Math.min(pos.y+0.1,maxY);
   },true);
@@ -179,7 +179,3 @@ if(isMobile){
   </a-scene>
 </body>
 </html>
-
-
-
-
